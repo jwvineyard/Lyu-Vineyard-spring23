@@ -11,7 +11,7 @@ import scipy as sp
 # s is a column vector with s[i] being 1 if node i is in group 1, and -1 if node i is in group 2
 # B is the modulatiry matrix, gained from equation 3
 def Q(s,G,B):
-    m = G.number_of_edges
+    m = G.number_of_edges()
     return (1/(4*m)) * np.matmul(np.transpose(s), (np.matmul(B, s)))
 
 
@@ -19,11 +19,12 @@ def Q(s,G,B):
 def modularity_matrix(G):
     # populate modularity matrix
     m = G.number_of_edges()
-    B = np.zeros((m,m))
-    A = nx.adjacency_matrix(G).toarray
-    for i in np.arange(m):
-        for j in np.arange(m):
-            ki = G.degree[i]
+    n = G.number_of_nodes()
+    B = np.zeros((n,n))
+    A = nx.adjacency_matrix(G).toarray()
+    for i in np.arange(n):
+        ki = G.degree[i]
+        for j in np.arange(n):
             kj = G.degree[j]
             B[i][j] = A[i][j] - ((ki*kj)/(2*m))
     return B
@@ -51,8 +52,8 @@ def modularity(G):
     u = v[np.argmax(w)]
     # divides the graph according to the leading eigenvector
     s = np.ones(u.size)
-    for i in u:
-        if u[i] < 0: s[i] = -1
+    for i, j in zip(u, s):
+        if i < 0: j = -1
 
     return Q(s,G,B)
 print(modularity(nx.karate_club_graph()))
